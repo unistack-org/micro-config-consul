@@ -1,4 +1,4 @@
-module github.com/unistack-org/micro-config-env
+module github.com/unistack-org/micro-config-consul
 
 go 1.15
 
