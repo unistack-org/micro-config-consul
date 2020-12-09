@@ -28,3 +28,11 @@ type pathKey struct{}
 func Path(path string) config.Option {
 	return config.SetOption(pathKey{}, path)
 }
+
+/*
+type tlsConfigKey struct{}
+
+func TLSConfig(t *tls.Config) config.Option {
+	return config.SetOption(tlsConfigKey{}, t)
+}
+*/

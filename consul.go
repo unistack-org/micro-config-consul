@@ -59,6 +59,11 @@ func (c *consulConfig) Init(opts ...config.Option) error {
 		if v, ok := c.opts.Context.Value(pathKey{}).(string); ok {
 			path = v
 		}
+		/*
+			if v, ok := c.opts.Context.Value(tlsConfigKey{}).(*tls.Config); ok {
+				cfg.TLSConfig = *v
+			}
+		*/
 	}
 
 	cli, err := api.NewClient(cfg)
