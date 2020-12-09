@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 
-	api "github.com/hashicorp/consul/api"
+	"github.com/hashicorp/consul/api"
 	"github.com/unistack-org/micro/v3/config"
 )
 
@@ -30,12 +30,22 @@ func (c *consulConfig) Init(opts ...config.Option) error {
 		o(&c.opts)
 	}
 
-	cfg := api.DefaultConfig()
+	cfg := api.DefaultConfigWithLogger(&consulLogger{logger: c.opts.Logger})
 	path := ""
 
 	if c.opts.Context != nil {
 		if v, ok := c.opts.Context.Value(configKey{}).(*api.Config); ok {
-			cfg = v
+			cfg.Address = v.Address
+			cfg.Scheme = v.Scheme
+			cfg.Datacenter = v.Datacenter
+			cfg.Transport = v.Transport
+			cfg.HttpClient = v.HttpClient
+			cfg.HttpAuth = v.HttpAuth
+			cfg.WaitTime = v.WaitTime
+			cfg.Token = v.Token
+			cfg.TokenFile = v.TokenFile
+			cfg.Namespace = v.Namespace
+			cfg.TLSConfig = v.TLSConfig
 		}
 
 		if v, ok := c.opts.Context.Value(addrKey{}).(string); ok {
@@ -49,7 +59,6 @@ func (c *consulConfig) Init(opts ...config.Option) error {
 		if v, ok := c.opts.Context.Value(pathKey{}).(string); ok {
 			path = v
 		}
-
 	}
 
 	cli, err := api.NewClient(cfg)
