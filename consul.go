@@ -5,6 +5,7 @@ import (
 	"errors"
 
 	"github.com/hashicorp/consul/api"
+	jsoncodec "github.com/unistack-org/micro-codec-json"
 	"github.com/unistack-org/micro/v3/config"
 )
 
@@ -100,5 +101,6 @@ func NewConfig(opts ...config.Option) config.Config {
 	if len(options.StructTag) == 0 {
 		options.StructTag = DefaultStructTag
 	}
+	options.Codec = jsoncodec.NewCodec()
 	return &consulConfig{opts: options}
 }
