@@ -2,7 +2,6 @@ package consul
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 
 	"github.com/hashicorp/consul/api"
@@ -85,7 +84,7 @@ func (c *consulConfig) Load(ctx context.Context) error {
 		return ErrPathNotExist
 	}
 
-	return json.Unmarshal(pair.Value, c.opts.Struct)
+	return c.opts.Codec.Unmarshal(pair.Value, c.opts.Struct)
 }
 
 func (c *consulConfig) Save(ctx context.Context) error {
