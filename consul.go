@@ -5,7 +5,6 @@ import (
 	"errors"
 
 	"github.com/hashicorp/consul/api"
-	jsoncodec "github.com/unistack-org/micro-codec-json"
 	"github.com/unistack-org/micro/v3/config"
 )
 
@@ -27,6 +26,10 @@ func (c *consulConfig) Options() config.Options {
 func (c *consulConfig) Init(opts ...config.Option) error {
 	for _, o := range opts {
 		o(&c.opts)
+	}
+
+	if c.opts.Codec == nil {
+		return config.ErrCodecMissing
 	}
 
 	cfg := api.DefaultConfigWithLogger(&consulLogger{logger: c.opts.Logger})
@@ -100,6 +103,5 @@ func NewConfig(opts ...config.Option) config.Config {
 	if len(options.StructTag) == 0 {
 		options.StructTag = DefaultStructTag
 	}
-	options.Codec = jsoncodec.NewCodec()
 	return &consulConfig{opts: options}
 }
