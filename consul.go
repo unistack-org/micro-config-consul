@@ -11,7 +11,6 @@ import (
 
 var (
 	DefaultStructTag = "consul"
-	ErrInvalidStruct = errors.New("invalid struct specified")
 	ErrPathNotExist  = errors.New("path is not exist")
 )
 
