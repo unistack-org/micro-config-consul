@@ -3,6 +3,7 @@ package consul
 import (
 	"context"
 	"errors"
+	"fmt"
 
 	"github.com/hashicorp/consul/api"
 	"github.com/unistack-org/micro/v3/config"
@@ -82,9 +83,9 @@ func (c *consulConfig) Init(opts ...config.Option) error {
 func (c *consulConfig) Load(ctx context.Context) error {
 	pair, _, err := c.cli.KV().Get(c.path, nil)
 	if err != nil {
-		return err
+		return fmt.Errorf("consul path load error: %v", err)
 	} else if pair == nil {
-		return ErrPathNotExist
+		return fmt.Errorf("consul path not found %v", ErrPathNotExist)
 	}
 
 	return c.opts.Codec.Unmarshal(pair.Value, c.opts.Struct)
