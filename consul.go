@@ -81,6 +81,12 @@ func (c *consulConfig) Init(opts ...config.Option) error {
 }
 
 func (c *consulConfig) Load(ctx context.Context) error {
+	for _, fn := range c.opts.BeforeLoad {
+		if err := fn(ctx, c); err != nil {
+			return err
+		}
+	}
+
 	pair, _, err := c.cli.KV().Get(c.path, nil)
 	if err != nil {
 		return fmt.Errorf("consul path load error: %v", err)
@@ -88,10 +94,32 @@ func (c *consulConfig) Load(ctx context.Context) error {
 		return fmt.Errorf("consul path not found %v", ErrPathNotExist)
 	}
 
-	return c.opts.Codec.Unmarshal(pair.Value, c.opts.Struct)
+	if err = c.opts.Codec.Unmarshal(pair.Value, c.opts.Struct); err != nil {
+		return err
+	}
+
+	for _, fn := range c.opts.AfterLoad {
+		if err := fn(ctx, c); err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
 
 func (c *consulConfig) Save(ctx context.Context) error {
+	for _, fn := range c.opts.BeforeSave {
+		if err := fn(ctx, c); err != nil {
+			return err
+		}
+	}
+
+	for _, fn := range c.opts.AfterSave {
+		if err := fn(ctx, c); err != nil {
+			return err
+		}
+	}
+
 	return nil
 }
 
