@@ -96,11 +96,11 @@ func (c *consulConfig) Load(ctx context.Context) error {
 	}
 
 	if err == nil && pair != nil {
-		dst, err := config.Zero(c.opts.Struct)
+		src, err := config.Zero(c.opts.Struct)
 		if err == nil {
-			err = c.opts.Codec.Unmarshal(pair.Value, c.opts.Struct)
+			err = c.opts.Codec.Unmarshal(pair.Value, src)
 			if err == nil {
-				err = mergo.Merge(c.opts.Struct, dst, mergo.WithOverride, mergo.WithTypeCheck, mergo.WithAppendSlice)
+				err = mergo.Merge(c.opts.Struct, src, mergo.WithOverride, mergo.WithTypeCheck, mergo.WithAppendSlice)
 			}
 		}
 
