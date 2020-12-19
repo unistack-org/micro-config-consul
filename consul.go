@@ -82,24 +82,26 @@ func (c *consulConfig) Init(opts ...config.Option) error {
 
 func (c *consulConfig) Load(ctx context.Context) error {
 	for _, fn := range c.opts.BeforeLoad {
-		if err := fn(ctx, c); err != nil {
+		if err := fn(ctx, c); err != nil && !c.opts.AllowFail {
 			return err
 		}
 	}
 
 	pair, _, err := c.cli.KV().Get(c.path, nil)
-	if err != nil {
+	if err != nil && !c.opts.AllowFail {
 		return fmt.Errorf("consul path load error: %v", err)
-	} else if pair == nil {
+	} else if pair == nil && !c.opts.AllowFail {
 		return fmt.Errorf("consul path not found %v", ErrPathNotExist)
 	}
 
-	if err = c.opts.Codec.Unmarshal(pair.Value, c.opts.Struct); err != nil {
-		return err
+	if err == nil && pair != nil {
+		if err = c.opts.Codec.Unmarshal(pair.Value, c.opts.Struct); err != nil && !c.opts.AllowFail {
+			return err
+		}
 	}
 
 	for _, fn := range c.opts.AfterLoad {
-		if err := fn(ctx, c); err != nil {
+		if err := fn(ctx, c); err != nil && !c.opts.AllowFail {
 			return err
 		}
 	}
@@ -109,13 +111,13 @@ func (c *consulConfig) Load(ctx context.Context) error {
 
 func (c *consulConfig) Save(ctx context.Context) error {
 	for _, fn := range c.opts.BeforeSave {
-		if err := fn(ctx, c); err != nil {
+		if err := fn(ctx, c); err != nil && !c.opts.AllowFail {
 			return err
 		}
 	}
 
 	for _, fn := range c.opts.AfterSave {
-		if err := fn(ctx, c); err != nil {
+		if err := fn(ctx, c); err != nil && !c.opts.AllowFail {
 			return err
 		}
 	}
