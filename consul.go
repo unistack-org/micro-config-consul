@@ -6,6 +6,7 @@ import (
 	"fmt"
 
 	"github.com/hashicorp/consul/api"
+	"github.com/imdario/mergo"
 	"github.com/unistack-org/micro/v3/config"
 )
 
@@ -95,9 +96,18 @@ func (c *consulConfig) Load(ctx context.Context) error {
 	}
 
 	if err == nil && pair != nil {
-		if err = c.opts.Codec.Unmarshal(pair.Value, c.opts.Struct); err != nil && !c.opts.AllowFail {
+		dst, err := config.Zero(c.opts.Struct)
+		if err == nil {
+			err = c.opts.Codec.Unmarshal(pair.Value, c.opts.Struct)
+			if err == nil {
+				err = mergo.Merge(c.opts.Struct, dst, mergo.WithOverride, mergo.WithTypeCheck, mergo.WithAppendSlice)
+			}
+		}
+
+		if err != nil && !c.opts.AllowFail {
 			return err
 		}
+
 	}
 
 	for _, fn := range c.opts.AfterLoad {
