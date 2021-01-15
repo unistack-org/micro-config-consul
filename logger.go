@@ -2,6 +2,7 @@ package consul
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"io"
 	"log"
@@ -33,22 +34,22 @@ func (l *consulLogger) With(args ...interface{}) hclog.Logger {
 }
 
 func (l *consulLogger) Debug(format string, msg ...interface{}) {
-	l.logger.Debugf(format, msg...)
+	l.logger.Debugf(context.TODO(), format, msg...)
 }
 
 func (l *consulLogger) Error(format string, msg ...interface{}) {
-	l.logger.Errorf(format, msg...)
+	l.logger.Errorf(context.TODO(), format, msg...)
 }
 
 func (l *consulLogger) Info(format string, msg ...interface{}) {
-	l.logger.Infof(format, msg...)
+	l.logger.Infof(context.TODO(), format, msg...)
 }
 
 func (l *consulLogger) Warn(format string, msg ...interface{}) {
-	l.logger.Warnf(format, msg...)
+	l.logger.Warnf(context.TODO(), format, msg...)
 }
 func (l *consulLogger) Trace(format string, msg ...interface{}) {
-	l.logger.Tracef(format, msg...)
+	l.logger.Tracef(context.TODO(), format, msg...)
 }
 
 func (l *consulLogger) ImpliedArgs() []interface{} {
