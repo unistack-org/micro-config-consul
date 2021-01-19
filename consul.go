@@ -8,6 +8,7 @@ import (
 	"github.com/hashicorp/consul/api"
 	"github.com/imdario/mergo"
 	"github.com/unistack-org/micro/v3/config"
+	rutil "github.com/unistack-org/micro/v3/util/reflect"
 )
 
 var (
@@ -96,7 +97,7 @@ func (c *consulConfig) Load(ctx context.Context) error {
 	}
 
 	if err == nil && pair != nil {
-		src, err := config.Zero(c.opts.Struct)
+		src, err := rutil.Zero(c.opts.Struct)
 		if err == nil {
 			err = c.opts.Codec.Unmarshal(pair.Value, src)
 			if err == nil {
