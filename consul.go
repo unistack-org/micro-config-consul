@@ -140,6 +140,10 @@ func (c *consulConfig) String() string {
 	return "consul"
 }
 
+func (c *consulConfig) Name() string {
+	return c.opts.Name
+}
+
 func NewConfig(opts ...config.Option) config.Config {
 	options := config.NewOptions(opts...)
 	if len(options.StructTag) == 0 {
