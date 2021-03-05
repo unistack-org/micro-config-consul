@@ -72,7 +72,7 @@ func (c *consulConfig) Init(opts ...config.Option) error {
 	}
 
 	cli, err := api.NewClient(cfg)
-	if err != nil {
+	if err != nil && !c.opts.AllowFail {
 		return err
 	}
 
