@@ -1,6 +1,8 @@
 package consul
 
 import (
+	"time"
+
 	"github.com/hashicorp/consul/api"
 	"github.com/unistack-org/micro/v3/config"
 )
@@ -36,3 +38,9 @@ func TLSConfig(t *tls.Config) config.Option {
 	return config.SetOption(tlsConfigKey{}, t)
 }
 */
+
+type timeoutKey struct{}
+
+func Timeout(td time.Duration) config.Option {
+	return config.SetOption(timeoutKey{}, td)
+}

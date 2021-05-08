@@ -127,6 +127,15 @@ func (c *consulConfig) Save(ctx context.Context) error {
 		}
 	}
 
+	buf, err := c.opts.Codec.Marshal(c.opts.Struct)
+	if err == nil {
+		_, err = c.cli.KV().Put(&api.KVPair{Key: c.path, Value: buf}, nil)
+	}
+
+	if err != nil && !c.opts.AllowFail {
+		return fmt.Errorf("consul path save error: %v", err)
+	}
+
 	for _, fn := range c.opts.AfterSave {
 		if err := fn(ctx, c); err != nil && !c.opts.AllowFail {
 			return err
