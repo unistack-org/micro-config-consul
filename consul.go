@@ -2,7 +2,6 @@ package consul
 
 import (
 	"context"
-	"errors"
 	"fmt"
 
 	"github.com/hashicorp/consul/api"
@@ -13,7 +12,6 @@ import (
 
 var (
 	DefaultStructTag = "consul"
-	ErrPathNotExist  = errors.New("path is not exist")
 )
 
 type consulConfig struct {
@@ -93,7 +91,7 @@ func (c *consulConfig) Load(ctx context.Context, opts ...config.LoadOption) erro
 	if err != nil && !c.opts.AllowFail {
 		return fmt.Errorf("consul path load error: %v", err)
 	} else if pair == nil && !c.opts.AllowFail {
-		return fmt.Errorf("consul path not found %v", ErrPathNotExist)
+		return fmt.Errorf("consul path not found %s", c.path)
 	}
 
 	if err == nil && pair != nil {
