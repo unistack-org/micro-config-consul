@@ -89,9 +89,9 @@ func (c *consulConfig) Load(ctx context.Context, opts ...config.LoadOption) erro
 
 	pair, _, err := c.cli.KV().Get(c.path, nil)
 	if err != nil && !c.opts.AllowFail {
-		return fmt.Errorf("consul path load error: %v", err)
+		return fmt.Errorf("consul path %s load error: %v", c.path, err)
 	} else if pair == nil && !c.opts.AllowFail {
-		return fmt.Errorf("consul path not found %s", c.path)
+		return fmt.Errorf("consul path %s not found", c.path)
 	}
 
 	if err == nil && pair != nil {
@@ -140,7 +140,7 @@ func (c *consulConfig) Save(ctx context.Context, opts ...config.SaveOption) erro
 	}
 
 	if err != nil && !c.opts.AllowFail {
-		return fmt.Errorf("consul path save error: %v", err)
+		return fmt.Errorf("consul path %s save error: %v", c.path, err)
 	}
 
 	for _, fn := range c.opts.AfterSave {
