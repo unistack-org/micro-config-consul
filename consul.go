@@ -3,10 +3,12 @@ package consul
 import (
 	"context"
 	"fmt"
+	"reflect"
 
 	"github.com/hashicorp/consul/api"
 	"github.com/imdario/mergo"
 	"github.com/unistack-org/micro/v3/config"
+	"github.com/unistack-org/micro/v3/util/jitter"
 	rutil "github.com/unistack-org/micro/v3/util/reflect"
 )
 
@@ -104,11 +106,16 @@ func (c *consulConfig) Load(ctx context.Context, opts ...config.LoadOption) erro
 			mopts = append(mopts, mergo.WithAppendSlice)
 		}
 
-		src, err := rutil.Zero(c.opts.Struct)
+		dst := c.opts.Struct
+		if options.Struct != nil {
+			dst = options.Struct
+		}
+
+		src, err := rutil.Zero(dst)
 		if err == nil {
 			err = c.opts.Codec.Unmarshal(pair.Value, src)
 			if err == nil {
-				err = mergo.Merge(c.opts.Struct, src, mopts...)
+				err = mergo.Merge(dst, src, mopts...)
 			}
 		}
 
@@ -158,6 +165,113 @@ func (c *consulConfig) String() string {
 
 func (c *consulConfig) Name() string {
 	return c.opts.Name
+}
+
+func (c *consulConfig) Watch(ctx context.Context, opts ...config.WatchOption) (config.Watcher, error) {
+	w := &consulWatcher{
+		cli:   c.cli,
+		path:  c.path,
+		opts:  c.opts,
+		wopts: config.NewWatchOptions(opts...),
+		done:  make(chan struct{}),
+		vchan: make(chan map[string]interface{}),
+		echan: make(chan error),
+	}
+
+	go w.run()
+
+	return w, nil
+}
+
+type consulWatcher struct {
+	cli   *api.Client
+	path  string
+	opts  config.Options
+	wopts config.WatchOptions
+	done  chan struct{}
+	vchan chan map[string]interface{}
+	echan chan error
+}
+
+func (w *consulWatcher) run() {
+	ticker := jitter.NewTicker(w.wopts.MinInterval, w.wopts.MaxInterval)
+	defer ticker.Stop()
+
+	src := w.opts.Struct
+	if w.wopts.Struct != nil {
+		src = w.wopts.Struct
+	}
+
+	for {
+		select {
+		case <-w.done:
+			return
+		case <-ticker.C:
+			dst, err := rutil.Zero(src)
+			if err != nil {
+				w.echan <- err
+				return
+			}
+
+			pair, _, err := w.cli.KV().Get(w.path, nil)
+			if err != nil {
+				w.echan <- err
+				return
+			}
+
+			if pair == nil {
+				w.echan <- fmt.Errorf("consul path %s not found", w.path)
+				return
+			}
+
+			err = w.opts.Codec.Unmarshal(pair.Value, dst)
+			if err != nil {
+				w.echan <- err
+				return
+			}
+
+			srcmp, err := rutil.StructFieldsMap(src)
+			if err != nil {
+				w.echan <- err
+				return
+			}
+
+			dstmp, err := rutil.StructFieldsMap(dst)
+			if err != nil {
+				w.echan <- err
+				return
+			}
+
+			for sk, sv := range srcmp {
+				if reflect.DeepEqual(dstmp[sk], sv) {
+					delete(dstmp, sk)
+				}
+			}
+
+			w.vchan <- dstmp
+			src = dst
+		}
+	}
+}
+
+func (w *consulWatcher) Next() (map[string]interface{}, error) {
+	select {
+	case <-w.done:
+		break
+	case err := <-w.echan:
+		return nil, err
+	case v, ok := <-w.vchan:
+		if !ok {
+			break
+		}
+		return v, nil
+	}
+	return nil, config.ErrWatcherStopped
+}
+
+func (w *consulWatcher) Stop() error {
+	close(w.done)
+	return nil
 }
 
 func NewConfig(opts ...config.Option) config.Config {
