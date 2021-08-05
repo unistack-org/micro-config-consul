@@ -27,7 +27,7 @@ func (l *consulLogger) Name() string {
 
 func (l *consulLogger) With(args ...interface{}) hclog.Logger {
 	fields := make(map[string]interface{}, int(len(args)/2))
-	for i := 0; i < int(len(args)/2); i = i + 2 {
+	for i := 0; i < int(len(args)/2); i += 2 {
 		fields[fmt.Sprintf("%v", args[i])] = args[i+1]
 	}
 	return &consulLogger{logger: l.logger.Fields(fields)}
@@ -62,16 +62,25 @@ func (l *consulLogger) ImpliedArgs() []interface{} {
 
 func (l *consulLogger) Named(name string) hclog.Logger {
 	var newname string
-	if oldname, ok := l.logger.Options().Fields["name"]; ok {
+	var oldname string
+
+	fields := l.logger.Options().Fields
+	for i := 0; i < len(fields); i += 2 {
+		if fields[i].(string) == "name" {
+			oldname = fields[i+1].(string)
+		}
+	}
+
+	if len(oldname) > 0 {
 		newname = fmt.Sprintf("%s.%s", oldname, name)
 	} else {
 		newname = fmt.Sprintf("%s", name)
 	}
-	return &consulLogger{logger: l.logger.Fields(map[string]interface{}{"name": newname})}
+	return &consulLogger{logger: l.logger.Fields("name", newname)}
 }
 
 func (l *consulLogger) ResetNamed(name string) hclog.Logger {
-	return &consulLogger{logger: l.logger.Fields(map[string]interface{}{"name": name})}
+	return &consulLogger{logger: l.logger.Fields("name", name)}
 }
 
 func (l *consulLogger) SetLevel(level hclog.Level) {
