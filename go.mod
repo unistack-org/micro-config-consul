@@ -9,5 +9,6 @@ require (
 	github.com/hashicorp/golang-lru v0.5.3 // indirect
 	github.com/imdario/mergo v0.3.12
 	github.com/pkg/errors v0.9.1 // indirect
-	github.com/unistack-org/micro/v3 v3.7.1
+	github.com/stretchr/testify v1.7.0 // indirect
+	github.com/unistack-org/micro/v3 v3.7.4
 )
