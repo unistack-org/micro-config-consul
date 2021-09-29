@@ -82,38 +82,23 @@ func (c *consulConfig) Init(opts ...config.Option) error {
 }
 
 func (c *consulConfig) Load(ctx context.Context, opts ...config.LoadOption) error {
-	for _, fn := range c.opts.BeforeLoad {
-		if err := fn(ctx, c); err != nil {
-			c.opts.Logger.Errorf(c.opts.Context, "consul load err: %v", err)
-			if !c.opts.AllowFail {
-				return err
-			}
-		}
+	if err := config.DefaultBeforeLoad(ctx, c); err != nil {
+		return err
 	}
 
 	pair, _, err := c.cli.KV().Get(c.path, nil)
 	if err != nil {
-		c.opts.Logger.Errorf(c.opts.Context, "consul load path %s err: %v", c.path, err)
-		if !c.opts.AllowFail {
-			return fmt.Errorf("consul path %s load error: %v", c.path, err)
-		}
+		err = fmt.Errorf("consul path %s load error: %w", c.path, err)
 	} else if pair == nil {
-		c.opts.Logger.Errorf(c.opts.Context, "consul load path %s not found", c.path)
-		if !c.opts.AllowFail {
-			return fmt.Errorf("consul path %s not found", c.path)
-		}
+		err = fmt.Errorf("consul path %s load error: not found", c.path)
 	}
 
-	if err != nil || pair == nil {
-		for _, fn := range c.opts.AfterLoad {
-			if err := fn(ctx, c); err != nil {
-				c.opts.Logger.Errorf(c.opts.Context, "consul load err: %v", err)
-				if !c.opts.AllowFail {
-					return err
-				}
-			}
+	if err != nil {
+		c.opts.Logger.Error(c.opts.Context, err)
+		if !c.opts.AllowFail {
+			return err
 		}
-		return nil
+		return config.DefaultAfterLoad(ctx, c)
 	}
 
 	options := config.NewLoadOptions(opts...)
@@ -145,26 +130,16 @@ func (c *consulConfig) Load(ctx context.Context, opts ...config.LoadOption) erro
 		}
 	}
 
-	for _, fn := range c.opts.AfterLoad {
-		if err := fn(ctx, c); err != nil {
-			c.opts.Logger.Errorf(c.opts.Context, "consul load err: %v", err)
-			if !c.opts.AllowFail {
-				return err
-			}
-		}
+	if err := config.DefaultAfterLoad(ctx, c); err != nil {
+		return err
 	}
 
 	return nil
 }
 
 func (c *consulConfig) Save(ctx context.Context, opts ...config.SaveOption) error {
-	for _, fn := range c.opts.BeforeSave {
-		if err := fn(ctx, c); err != nil {
-			c.opts.Logger.Errorf(c.opts.Context, "consul save err: %v", err)
-			if !c.opts.AllowFail {
-				return err
-			}
-		}
+	if err := config.DefaultBeforeSave(ctx, c); err != nil {
+		return err
 	}
 
 	buf, err := c.opts.Codec.Marshal(c.opts.Struct)
@@ -173,19 +148,14 @@ func (c *consulConfig) Save(ctx context.Context, opts ...config.SaveOption) erro
 	}
 
 	if err != nil {
-		c.opts.Logger.Errorf(c.opts.Context, "consul path %s save err: %v", c.path, err)
+		c.opts.Logger.Errorf(c.opts.Context, "consul path %s save error: %v", c.path, err)
 		if !c.opts.AllowFail {
 			return fmt.Errorf("consul path %s save error: %v", c.path, err)
 		}
 	}
 
-	for _, fn := range c.opts.AfterSave {
-		if err := fn(ctx, c); err != nil {
-			c.opts.Logger.Errorf(c.opts.Context, "consul save err: %v", err)
-			if !c.opts.AllowFail {
-				return err
-			}
-		}
+	if err := config.DefaultAfterSave(ctx, c); err != nil {
+		return err
 	}
 
 	return nil
