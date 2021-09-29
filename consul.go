@@ -68,8 +68,11 @@ func (c *consulConfig) Init(opts ...config.Option) error {
 	}
 
 	cli, err := api.NewClient(cfg)
-	if err != nil && !c.opts.AllowFail {
-		return err
+	if err != nil {
+		c.opts.Logger.Errorf(c.opts.Context, "consul init err: %v", err)
+		if !c.opts.AllowFail {
+			return err
+		}
 	}
 
 	c.cli = cli
