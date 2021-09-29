@@ -12,10 +12,8 @@ import (
 	"github.com/unistack-org/micro/v3/logger"
 )
 
-var (
-	// to check implementation
-	_ hclog.Logger = &consulLogger{}
-)
+// to check implementation
+var _ hclog.Logger = &consulLogger{}
 
 type consulLogger struct {
 	logger logger.Logger
@@ -48,6 +46,7 @@ func (l *consulLogger) Info(format string, msg ...interface{}) {
 func (l *consulLogger) Warn(format string, msg ...interface{}) {
 	l.logger.Warnf(context.TODO(), format, msg...)
 }
+
 func (l *consulLogger) Trace(format string, msg ...interface{}) {
 	l.logger.Tracef(context.TODO(), format, msg...)
 }
@@ -74,7 +73,7 @@ func (l *consulLogger) Named(name string) hclog.Logger {
 	if len(oldname) > 0 {
 		newname = fmt.Sprintf("%s.%s", oldname, name)
 	} else {
-		newname = fmt.Sprintf("%s", name)
+		newname = name
 	}
 	return &consulLogger{logger: l.logger.Fields("name", newname)}
 }

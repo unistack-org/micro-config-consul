@@ -10,9 +10,7 @@ import (
 	rutil "github.com/unistack-org/micro/v3/util/reflect"
 )
 
-var (
-	DefaultStructTag = "consul"
-)
+var DefaultStructTag = "consul"
 
 type consulConfig struct {
 	opts config.Options
@@ -82,50 +80,74 @@ func (c *consulConfig) Init(opts ...config.Option) error {
 
 func (c *consulConfig) Load(ctx context.Context, opts ...config.LoadOption) error {
 	for _, fn := range c.opts.BeforeLoad {
-		if err := fn(ctx, c); err != nil && !c.opts.AllowFail {
-			return err
+		if err := fn(ctx, c); err != nil {
+			c.opts.Logger.Errorf(c.opts.Context, "consul load err: %v", err)
+			if !c.opts.AllowFail {
+				return err
+			}
 		}
 	}
 
 	pair, _, err := c.cli.KV().Get(c.path, nil)
-	if err != nil && !c.opts.AllowFail {
-		return fmt.Errorf("consul path %s load error: %v", c.path, err)
-	} else if pair == nil && !c.opts.AllowFail {
-		return fmt.Errorf("consul path %s not found", c.path)
+	if err != nil {
+		c.opts.Logger.Errorf(c.opts.Context, "consul load path %s err: %v", c.path, err)
+		if !c.opts.AllowFail {
+			return fmt.Errorf("consul path %s load error: %v", c.path, err)
+		}
+	} else if pair == nil {
+		c.opts.Logger.Errorf(c.opts.Context, "consul load path %s not found", c.path)
+		if !c.opts.AllowFail {
+			return fmt.Errorf("consul path %s not found", c.path)
+		}
 	}
 
-	if err == nil && pair != nil {
-		options := config.NewLoadOptions(opts...)
-		mopts := []func(*mergo.Config){mergo.WithTypeCheck}
-		if options.Override {
-			mopts = append(mopts, mergo.WithOverride)
-		}
-		if options.Append {
-			mopts = append(mopts, mergo.WithAppendSlice)
-		}
-
-		dst := c.opts.Struct
-		if options.Struct != nil {
-			dst = options.Struct
-		}
-
-		src, err := rutil.Zero(dst)
-		if err == nil {
-			err = c.opts.Codec.Unmarshal(pair.Value, src)
-			if err == nil {
-				err = mergo.Merge(dst, src, mopts...)
+	if err != nil || pair == nil {
+		for _, fn := range c.opts.AfterLoad {
+			if err := fn(ctx, c); err != nil {
+				c.opts.Logger.Errorf(c.opts.Context, "consul load err: %v", err)
+				if !c.opts.AllowFail {
+					return err
+				}
 			}
 		}
+		return nil
+	}
 
-		if err != nil && !c.opts.AllowFail {
+	options := config.NewLoadOptions(opts...)
+	mopts := []func(*mergo.Config){mergo.WithTypeCheck}
+	if options.Override {
+		mopts = append(mopts, mergo.WithOverride)
+	}
+	if options.Append {
+		mopts = append(mopts, mergo.WithAppendSlice)
+	}
+
+	dst := c.opts.Struct
+	if options.Struct != nil {
+		dst = options.Struct
+	}
+
+	src, err := rutil.Zero(dst)
+	if err == nil {
+		err = c.opts.Codec.Unmarshal(pair.Value, src)
+		if err == nil {
+			err = mergo.Merge(dst, src, mopts...)
+		}
+	}
+
+	if err != nil {
+		c.opts.Logger.Errorf(c.opts.Context, "consul load err: %v", err)
+		if !c.opts.AllowFail {
 			return err
 		}
-
 	}
 
 	for _, fn := range c.opts.AfterLoad {
-		if err := fn(ctx, c); err != nil && !c.opts.AllowFail {
-			return err
+		if err := fn(ctx, c); err != nil {
+			c.opts.Logger.Errorf(c.opts.Context, "consul load err: %v", err)
+			if !c.opts.AllowFail {
+				return err
+			}
 		}
 	}
 
@@ -134,8 +156,11 @@ func (c *consulConfig) Load(ctx context.Context, opts ...config.LoadOption) erro
 
 func (c *consulConfig) Save(ctx context.Context, opts ...config.SaveOption) error {
 	for _, fn := range c.opts.BeforeSave {
-		if err := fn(ctx, c); err != nil && !c.opts.AllowFail {
-			return err
+		if err := fn(ctx, c); err != nil {
+			c.opts.Logger.Errorf(c.opts.Context, "consul save err: %v", err)
+			if !c.opts.AllowFail {
+				return err
+			}
 		}
 	}
 
@@ -144,13 +169,19 @@ func (c *consulConfig) Save(ctx context.Context, opts ...config.SaveOption) erro
 		_, err = c.cli.KV().Put(&api.KVPair{Key: c.path, Value: buf}, nil)
 	}
 
-	if err != nil && !c.opts.AllowFail {
-		return fmt.Errorf("consul path %s save error: %v", c.path, err)
+	if err != nil {
+		c.opts.Logger.Errorf(c.opts.Context, "consul path %s save err: %v", c.path, err)
+		if !c.opts.AllowFail {
+			return fmt.Errorf("consul path %s save error: %v", c.path, err)
+		}
 	}
 
 	for _, fn := range c.opts.AfterSave {
-		if err := fn(ctx, c); err != nil && !c.opts.AllowFail {
-			return err
+		if err := fn(ctx, c); err != nil {
+			c.opts.Logger.Errorf(c.opts.Context, "consul save err: %v", err)
+			if !c.opts.AllowFail {
+				return err
+			}
 		}
 	}
 
