@@ -10,5 +10,5 @@ require (
 	github.com/imdario/mergo v0.3.12
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/stretchr/testify v1.7.0 // indirect
-	github.com/unistack-org/micro/v3 v3.7.4
+	github.com/unistack-org/micro/v3 v3.7.5
 )
