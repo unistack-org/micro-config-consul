@@ -1,4 +1,4 @@
-module github.com/unistack-org/micro-config-consul/v3
+module go.unistack.org/micro-config-consul/v3
 
 go 1.16
 
@@ -16,5 +16,5 @@ require (
 	github.com/mitchellh/mapstructure v1.4.2 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/stretchr/testify v1.7.0 // indirect
-	github.com/unistack-org/micro/v3 v3.7.6
+	go.unistack.org/micro/v3 v3.8.5
 )
