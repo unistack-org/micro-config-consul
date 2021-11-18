@@ -82,15 +82,23 @@ func (c *consulConfig) Init(opts ...config.Option) error {
 }
 
 func (c *consulConfig) Load(ctx context.Context, opts ...config.LoadOption) error {
+	path := c.path
+	options := config.NewLoadOptions(opts...)
+	if options.Context != nil {
+		if v, ok := options.Context.Value(pathKey{}).(string); ok && v != "" {
+			path = v
+		}
+	}
+
 	if err := config.DefaultBeforeLoad(ctx, c); err != nil {
 		return err
 	}
 
-	pair, _, err := c.cli.KV().Get(c.path, nil)
+	pair, _, err := c.cli.KV().Get(path, nil)
 	if err != nil {
-		err = fmt.Errorf("consul path %s load error: %w", c.path, err)
+		err = fmt.Errorf("consul path %s load error: %w", path, err)
 	} else if pair == nil {
-		err = fmt.Errorf("consul path %s load error: not found", c.path)
+		err = fmt.Errorf("consul path %s load error: not found", path)
 	}
 
 	if err != nil {
@@ -101,7 +109,6 @@ func (c *consulConfig) Load(ctx context.Context, opts ...config.LoadOption) erro
 		return config.DefaultAfterLoad(ctx, c)
 	}
 
-	options := config.NewLoadOptions(opts...)
 	mopts := []func(*mergo.Config){mergo.WithTypeCheck}
 	if options.Override {
 		mopts = append(mopts, mergo.WithOverride)
@@ -138,19 +145,27 @@ func (c *consulConfig) Load(ctx context.Context, opts ...config.LoadOption) erro
 }
 
 func (c *consulConfig) Save(ctx context.Context, opts ...config.SaveOption) error {
+	path := c.path
+	options := config.NewSaveOptions(opts...)
+	if options.Context != nil {
+		if v, ok := options.Context.Value(pathKey{}).(string); ok && v != "" {
+			path = v
+		}
+	}
+
 	if err := config.DefaultBeforeSave(ctx, c); err != nil {
 		return err
 	}
 
 	buf, err := c.opts.Codec.Marshal(c.opts.Struct)
 	if err == nil {
-		_, err = c.cli.KV().Put(&api.KVPair{Key: c.path, Value: buf}, nil)
+		_, err = c.cli.KV().Put(&api.KVPair{Key: path, Value: buf}, nil)
 	}
 
 	if err != nil {
-		c.opts.Logger.Errorf(c.opts.Context, "consul path %s save error: %v", c.path, err)
+		c.opts.Logger.Errorf(c.opts.Context, "consul path %s save error: %v", path, err)
 		if !c.opts.AllowFail {
-			return fmt.Errorf("consul path %s save error: %v", c.path, err)
+			return fmt.Errorf("consul path %s save error: %v", path, err)
 		}
 	}
 
@@ -170,9 +185,17 @@ func (c *consulConfig) Name() string {
 }
 
 func (c *consulConfig) Watch(ctx context.Context, opts ...config.WatchOption) (config.Watcher, error) {
+	path := c.path
+	options := config.NewWatchOptions(opts...)
+	if options.Context != nil {
+		if v, ok := options.Context.Value(pathKey{}).(string); ok && v != "" {
+			path = v
+		}
+	}
+
 	w := &consulWatcher{
 		cli:   c.cli,
-		path:  c.path,
+		path:  path,
 		opts:  c.opts,
 		wopts: config.NewWatchOptions(opts...),
 		done:  make(chan struct{}),

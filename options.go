@@ -44,3 +44,15 @@ type timeoutKey struct{}
 func Timeout(td time.Duration) config.Option {
 	return config.SetOption(timeoutKey{}, td)
 }
+
+func LoadPath(path string) config.LoadOption {
+	return config.SetLoadOption(pathKey{}, path)
+}
+
+func SavePath(path string) config.SaveOption {
+	return config.SetSaveOption(pathKey{}, path)
+}
+
+func WatchPath(path string) config.WatchOption {
+	return config.SetWatchOption(pathKey{}, path)
+}
