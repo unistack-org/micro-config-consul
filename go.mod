@@ -16,5 +16,5 @@ require (
 	github.com/mitchellh/mapstructure v1.4.2 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/stretchr/testify v1.7.0 // indirect
-	go.unistack.org/micro/v3 v3.8.15
+	go.unistack.org/micro/v3 v3.8.18
 )
