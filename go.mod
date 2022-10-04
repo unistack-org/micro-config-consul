@@ -6,7 +6,7 @@ require (
 	github.com/google/btree v1.0.1 // indirect
 	github.com/hashicorp/consul/api v1.15.2
 	github.com/hashicorp/go-cleanhttp v0.5.2 // indirect
-	github.com/hashicorp/go-hclog v1.3.0
+	github.com/hashicorp/go-hclog v1.3.1
 	github.com/hashicorp/go-immutable-radix v1.3.1 // indirect
 	github.com/imdario/mergo v0.3.13
 	github.com/mitchellh/mapstructure v1.4.2 // indirect
