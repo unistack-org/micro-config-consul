@@ -10,6 +10,6 @@ require (
 	github.com/hashicorp/go-immutable-radix v1.3.1 // indirect
 	github.com/imdario/mergo v0.3.13
 	github.com/mitchellh/mapstructure v1.4.2 // indirect
-	go.unistack.org/micro/v3 v3.9.11
+	go.unistack.org/micro/v3 v3.9.13
 	golang.org/x/net v0.0.0-20220225172249-27dd8689420f // indirect
 )
