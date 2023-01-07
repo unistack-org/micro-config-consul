@@ -23,6 +23,23 @@ func (l *consulLogger) Name() string {
 	return l.logger.String()
 }
 
+func (l *consulLogger) GetLevel() hclog.Level {
+	switch l.logger.Options().Level {
+	case logger.DebugLevel:
+		return hclog.Debug
+	case logger.TraceLevel:
+		return hclog.Trace
+	case logger.InfoLevel:
+		return hclog.Info
+	case logger.WarnLevel:
+		return hclog.Warn
+	case logger.ErrorLevel:
+		return hclog.Error
+	default:
+		return hclog.Info
+	}
+}
+
 func (l *consulLogger) With(args ...interface{}) hclog.Logger {
 	fields := make(map[string]interface{}, int(len(args)/2))
 	for i := 0; i < int(len(args)/2); i += 2 {
