@@ -13,6 +13,6 @@ require (
 	github.com/hashicorp/go-multierror v1.1.1 // indirect
 	github.com/imdario/mergo v0.3.13
 	github.com/mitchellh/mapstructure v1.4.2 // indirect
-	go.unistack.org/micro/v3 v3.10.5
+	go.unistack.org/micro/v3 v3.10.6
 	golang.org/x/net v0.0.0-20220225172249-27dd8689420f // indirect
 )
