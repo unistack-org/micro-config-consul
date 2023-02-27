@@ -5,7 +5,7 @@ go 1.16
 require (
 	github.com/armon/go-metrics v0.3.10 // indirect
 	github.com/google/btree v1.0.1 // indirect
-	github.com/hashicorp/consul/api v1.18.0
+	github.com/hashicorp/consul/api v1.19.1
 	github.com/hashicorp/go-cleanhttp v0.5.2 // indirect
 	github.com/hashicorp/go-hclog v1.4.0
 	github.com/hashicorp/go-immutable-radix v1.3.1 // indirect
