@@ -157,13 +157,18 @@ func (c *consulConfig) Save(ctx context.Context, opts ...config.SaveOption) erro
 
 	path := c.path
 
+	dst := c.opts.Struct
+	if options.Struct != nil {
+		dst = options.Struct
+	}
+
 	if options.Context != nil {
 		if v, ok := options.Context.Value(pathKey{}).(string); ok && v != "" {
 			path = v
 		}
 	}
 
-	buf, err := c.opts.Codec.Marshal(c.opts.Struct)
+	buf, err := c.opts.Codec.Marshal(dst)
 	if err == nil {
 		_, err = c.cli.KV().Put(&api.KVPair{Key: path, Value: buf}, nil)
 	}
