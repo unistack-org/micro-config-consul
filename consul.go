@@ -67,6 +67,10 @@ func (c *consulConfig) Init(opts ...config.Option) error {
 		*/
 	}
 
+	if err := config.DefaultBeforeInit(c.opts.Context, c); err != nil {
+		return err
+	}
+
 	cli, err := api.NewClient(cfg)
 	if err != nil {
 		c.opts.Logger.Errorf(c.opts.Context, "consul init err: %v", err)
@@ -77,6 +81,10 @@ func (c *consulConfig) Init(opts ...config.Option) error {
 
 	c.cli = cli
 	c.path = path
+
+	if err := config.DefaultAfterInit(c.opts.Context, c); err != nil {
+		return err
+	}
 
 	return nil
 }
