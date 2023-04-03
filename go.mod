@@ -11,8 +11,8 @@ require (
 	github.com/hashicorp/go-immutable-radix v1.3.1 // indirect
 	github.com/hashicorp/go-msgpack v0.5.5 // indirect
 	github.com/hashicorp/go-multierror v1.1.1 // indirect
-	github.com/imdario/mergo v0.3.13
+	github.com/imdario/mergo v0.3.14
 	github.com/mitchellh/mapstructure v1.4.2 // indirect
-	go.unistack.org/micro/v3 v3.10.18
+	go.unistack.org/micro/v3 v3.10.19
 	golang.org/x/net v0.0.0-20220225172249-27dd8689420f // indirect
 )
