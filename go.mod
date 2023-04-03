@@ -14,5 +14,5 @@ require (
 	github.com/imdario/mergo v0.3.14
 	github.com/mitchellh/mapstructure v1.4.2 // indirect
 	go.unistack.org/micro/v3 v3.10.19
-	golang.org/x/net v0.0.0-20220225172249-27dd8689420f // indirect
+	golang.org/x/net v0.7.0 // indirect
 )
