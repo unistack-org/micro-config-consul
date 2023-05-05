@@ -1,4 +1,4 @@
-package consul // import "go.unistack.org/micro-config-consul/v3"
+package consul // import "go.unistack.org/micro-config-consul/v4"
 
 import (
 	"context"
@@ -6,8 +6,8 @@ import (
 
 	"github.com/hashicorp/consul/api"
 	"github.com/imdario/mergo"
-	"go.unistack.org/micro/v3/config"
-	rutil "go.unistack.org/micro/v3/util/reflect"
+	"go.unistack.org/micro/v4/config"
+	rutil "go.unistack.org/micro/v4/util/reflect"
 )
 
 var DefaultStructTag = "consul"
