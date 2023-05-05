@@ -27,7 +27,11 @@ func (c *consulConfig) Init(opts ...config.Option) error {
 		o(&c.opts)
 	}
 
-	if c.opts.Codec == nil {
+	if err := config.DefaultBeforeInit(c.opts.Context, c); err != nil && !c.opts.AllowFail {
+		return err
+	}
+
+	if c.opts.Codec == nil && !c.opts.AllowFail {
 		return config.ErrCodecMissing
 	}
 
@@ -68,30 +72,33 @@ func (c *consulConfig) Init(opts ...config.Option) error {
 	}
 
 	cli, err := api.NewClient(cfg)
-	if err != nil {
-		c.opts.Logger.Errorf(c.opts.Context, "consul init err: %v", err)
-		if !c.opts.AllowFail {
-			return err
-		}
+	if err != nil && !c.opts.AllowFail {
+		return err
 	}
 
 	c.cli = cli
 	c.path = path
 
+	if err := config.DefaultAfterInit(c.opts.Context, c); err != nil && !c.opts.AllowFail {
+		return err
+	}
+
 	return nil
 }
 
 func (c *consulConfig) Load(ctx context.Context, opts ...config.LoadOption) error {
-	path := c.path
 	options := config.NewLoadOptions(opts...)
+
+	if err := config.DefaultBeforeLoad(ctx, c); err != nil && !c.opts.AllowFail {
+		return err
+	}
+
+	path := c.path
+
 	if options.Context != nil {
 		if v, ok := options.Context.Value(pathKey{}).(string); ok && v != "" {
 			path = v
 		}
-	}
-
-	if err := config.DefaultBeforeLoad(ctx, c); err != nil {
-		return err
 	}
 
 	pair, _, err := c.cli.KV().Get(path, nil)
@@ -101,12 +108,12 @@ func (c *consulConfig) Load(ctx context.Context, opts ...config.LoadOption) erro
 		err = fmt.Errorf("consul path %s load error: not found", path)
 	}
 
-	if err != nil {
-		c.opts.Logger.Error(c.opts.Context, err)
-		if !c.opts.AllowFail {
-			return err
-		}
-		return config.DefaultAfterLoad(ctx, c)
+	if err != nil && !c.opts.AllowFail {
+		return err
+	}
+
+	if err = config.DefaultAfterLoad(ctx, c); err != nil && !c.opts.AllowFail {
+		return err
 	}
 
 	mopts := []func(*mergo.Config){mergo.WithTypeCheck}
@@ -130,14 +137,11 @@ func (c *consulConfig) Load(ctx context.Context, opts ...config.LoadOption) erro
 		}
 	}
 
-	if err != nil {
-		c.opts.Logger.Errorf(c.opts.Context, "consul load err: %v", err)
-		if !c.opts.AllowFail {
-			return err
-		}
+	if err != nil && !c.opts.AllowFail {
+		return err
 	}
 
-	if err := config.DefaultAfterLoad(ctx, c); err != nil {
+	if err := config.DefaultAfterLoad(ctx, c); err != nil && !c.opts.AllowFail {
 		return err
 	}
 
@@ -145,31 +149,35 @@ func (c *consulConfig) Load(ctx context.Context, opts ...config.LoadOption) erro
 }
 
 func (c *consulConfig) Save(ctx context.Context, opts ...config.SaveOption) error {
-	path := c.path
 	options := config.NewSaveOptions(opts...)
+
+	if err := config.DefaultBeforeSave(ctx, c); err != nil && !c.opts.AllowFail {
+		return err
+	}
+
+	path := c.path
+
+	dst := c.opts.Struct
+	if options.Struct != nil {
+		dst = options.Struct
+	}
+
 	if options.Context != nil {
 		if v, ok := options.Context.Value(pathKey{}).(string); ok && v != "" {
 			path = v
 		}
 	}
 
-	if err := config.DefaultBeforeSave(ctx, c); err != nil {
-		return err
-	}
-
-	buf, err := c.opts.Codec.Marshal(c.opts.Struct)
+	buf, err := c.opts.Codec.Marshal(dst)
 	if err == nil {
 		_, err = c.cli.KV().Put(&api.KVPair{Key: path, Value: buf}, nil)
 	}
 
-	if err != nil {
-		c.opts.Logger.Errorf(c.opts.Context, "consul path %s save error: %v", path, err)
-		if !c.opts.AllowFail {
-			return fmt.Errorf("consul path %s save error: %v", path, err)
-		}
+	if err != nil && !c.opts.AllowFail {
+		return fmt.Errorf("consul path %s save error: %v", path, err)
 	}
 
-	if err := config.DefaultAfterSave(ctx, c); err != nil {
+	if err := config.DefaultAfterSave(ctx, c); err != nil && !c.opts.AllowFail {
 		return err
 	}
 
