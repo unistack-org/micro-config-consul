@@ -1,12 +1,12 @@
-module go.unistack.org/micro-config-consul/v3
+module go.unistack.org/micro-config-consul/v4
 
 go 1.20
 
 require (
 	github.com/hashicorp/consul/api v1.20.0
 	github.com/hashicorp/go-hclog v1.4.0
-	github.com/imdario/mergo v0.3.13
-	go.unistack.org/micro/v3 v3.10.16
+	github.com/imdario/mergo v0.3.14
+	go.unistack.org/micro/v4 v4.0.1
 )
 
 require (
