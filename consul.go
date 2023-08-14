@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/consul/api"
 	"github.com/imdario/mergo"
 	"go.unistack.org/micro/v4/config"
+	"go.unistack.org/micro/v4/options"
 	rutil "go.unistack.org/micro/v4/util/reflect"
 )
 
@@ -22,9 +23,12 @@ func (c *consulConfig) Options() config.Options {
 	return c.opts
 }
 
-func (c *consulConfig) Init(opts ...config.Option) error {
+func (c *consulConfig) Init(opts ...options.Option) error {
+	var err error
 	for _, o := range opts {
-		o(&c.opts)
+		if err = o(&c.opts); err != nil {
+			return err
+		}
 	}
 
 	if err := config.DefaultBeforeInit(c.opts.Context, c); err != nil && !c.opts.AllowFail {
@@ -86,7 +90,7 @@ func (c *consulConfig) Init(opts ...config.Option) error {
 	return nil
 }
 
-func (c *consulConfig) Load(ctx context.Context, opts ...config.LoadOption) error {
+func (c *consulConfig) Load(ctx context.Context, opts ...options.Option) error {
 	options := config.NewLoadOptions(opts...)
 
 	if err := config.DefaultBeforeLoad(ctx, c); err != nil && !c.opts.AllowFail {
@@ -148,7 +152,7 @@ func (c *consulConfig) Load(ctx context.Context, opts ...config.LoadOption) erro
 	return nil
 }
 
-func (c *consulConfig) Save(ctx context.Context, opts ...config.SaveOption) error {
+func (c *consulConfig) Save(ctx context.Context, opts ...options.Option) error {
 	options := config.NewSaveOptions(opts...)
 
 	if err := config.DefaultBeforeSave(ctx, c); err != nil && !c.opts.AllowFail {
@@ -192,7 +196,7 @@ func (c *consulConfig) Name() string {
 	return c.opts.Name
 }
 
-func (c *consulConfig) Watch(ctx context.Context, opts ...config.WatchOption) (config.Watcher, error) {
+func (c *consulConfig) Watch(ctx context.Context, opts ...options.Option) (config.Watcher, error) {
 	path := c.path
 	options := config.NewWatchOptions(opts...)
 	if options.Context != nil {
@@ -216,7 +220,7 @@ func (c *consulConfig) Watch(ctx context.Context, opts ...config.WatchOption) (c
 	return w, nil
 }
 
-func NewConfig(opts ...config.Option) config.Config {
+func NewConfig(opts ...options.Option) config.Config {
 	options := config.NewOptions(opts...)
 	if len(options.StructTag) == 0 {
 		options.StructTag = DefaultStructTag
