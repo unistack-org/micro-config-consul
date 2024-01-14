@@ -91,6 +91,10 @@ func (c *consulConfig) Init(opts ...options.Option) error {
 }
 
 func (c *consulConfig) Load(ctx context.Context, opts ...options.Option) error {
+	if c.opts.SkipLoad != nil && c.opts.SkipLoad(ctx, c) {
+		return nil
+	}
+
 	options := config.NewLoadOptions(opts...)
 
 	if err := config.DefaultBeforeLoad(ctx, c); err != nil && !c.opts.AllowFail {
@@ -153,6 +157,10 @@ func (c *consulConfig) Load(ctx context.Context, opts ...options.Option) error {
 }
 
 func (c *consulConfig) Save(ctx context.Context, opts ...options.Option) error {
+	if c.opts.SkipSave != nil && c.opts.SkipSave(ctx, c) {
+		return nil
+	}
+
 	options := config.NewSaveOptions(opts...)
 
 	if err := config.DefaultBeforeSave(ctx, c); err != nil && !c.opts.AllowFail {
