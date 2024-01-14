@@ -41,36 +41,36 @@ func (l *consulLogger) GetLevel() hclog.Level {
 }
 
 func (l *consulLogger) With(args ...interface{}) hclog.Logger {
-	fields := make(map[string]interface{}, int(len(args)/2))
+	fields := make([]interface{}, len(args))
 	for i := 0; i < int(len(args)/2); i += 2 {
-		fields[fmt.Sprintf("%v", args[i])] = args[i+1]
+		fields = append(fields, fmt.Sprintf("%v", args[i]), args[i+1])
 	}
-	return &consulLogger{logger: l.logger.Fields(fields)}
+	return &consulLogger{logger: l.logger.Clone(logger.WithAttrs(fields...))}
 }
 
 func (l *consulLogger) Debug(format string, msg ...interface{}) {
-	l.logger.Debugf(context.TODO(), format, msg...)
+	l.logger.Debug(context.TODO(), fmt.Sprintf(format, msg...))
 }
 
 func (l *consulLogger) Error(format string, msg ...interface{}) {
-	l.logger.Errorf(context.TODO(), format, msg...)
+	l.logger.Error(context.TODO(), fmt.Sprintf(format, msg...))
 }
 
 func (l *consulLogger) Info(format string, msg ...interface{}) {
-	l.logger.Infof(context.TODO(), format, msg...)
+	l.logger.Info(context.TODO(), fmt.Sprintf(format, msg...))
 }
 
 func (l *consulLogger) Warn(format string, msg ...interface{}) {
-	l.logger.Warnf(context.TODO(), format, msg...)
+	l.logger.Warn(context.TODO(), fmt.Sprintf(format, msg...))
 }
 
 func (l *consulLogger) Trace(format string, msg ...interface{}) {
-	l.logger.Tracef(context.TODO(), format, msg...)
+	l.logger.Trace(context.TODO(), fmt.Sprintf(format, msg...))
 }
 
 func (l *consulLogger) ImpliedArgs() []interface{} {
-	fields := make([]interface{}, len(l.logger.Options().Fields)*2)
-	for k, v := range l.logger.Options().Fields {
+	fields := make([]interface{}, len(l.logger.Options().Attrs)*2)
+	for k, v := range l.logger.Options().Attrs {
 		fields = append(fields, k, v)
 	}
 	return fields
@@ -80,7 +80,7 @@ func (l *consulLogger) Named(name string) hclog.Logger {
 	var newname string
 	var oldname string
 
-	fields := l.logger.Options().Fields
+	fields := l.logger.Options().Attrs
 	for i := 0; i < len(fields); i += 2 {
 		if fields[i].(string) == "name" {
 			oldname = fields[i+1].(string)
@@ -92,11 +92,11 @@ func (l *consulLogger) Named(name string) hclog.Logger {
 	} else {
 		newname = name
 	}
-	return &consulLogger{logger: l.logger.Fields("name", newname)}
+	return &consulLogger{logger: l.logger.Clone(logger.WithAttrs("name", newname))}
 }
 
 func (l *consulLogger) ResetNamed(name string) hclog.Logger {
-	return &consulLogger{logger: l.logger.Fields("name", name)}
+	return &consulLogger{logger: l.logger.Clone(logger.WithAttrs("name", name))}
 }
 
 func (l *consulLogger) SetLevel(level hclog.Level) {
