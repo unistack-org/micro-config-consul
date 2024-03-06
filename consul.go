@@ -1,11 +1,11 @@
-package consul // import "go.unistack.org/micro-config-consul/v4"
+package consul
 
 import (
 	"context"
 	"fmt"
 
+	"dario.cat/mergo"
 	"github.com/hashicorp/consul/api"
-	"github.com/imdario/mergo"
 	"go.unistack.org/micro/v4/config"
 	"go.unistack.org/micro/v4/options"
 	rutil "go.unistack.org/micro/v4/util/reflect"
