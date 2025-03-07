@@ -9,7 +9,7 @@ import (
 	"os"
 
 	hclog "github.com/hashicorp/go-hclog"
-	"go.unistack.org/micro/v3/logger"
+	"go.unistack.org/micro/v4/logger"
 )
 
 // to check implementation
