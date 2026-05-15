@@ -1,4 +1,4 @@
-module go.unistack.org/micro-config-consul/v4
+module go.unistack.org/micro-config-consul/v5
 
 go 1.23.0
 
@@ -8,7 +8,7 @@ require (
 	dario.cat/mergo v1.0.1
 	github.com/hashicorp/consul/api v1.32.0
 	github.com/hashicorp/go-hclog v1.6.3
-	go.unistack.org/micro/v4 v4.1.9
+	go.unistack.org/micro/v5 v4.1.9
 )
 
 require (
@@ -33,7 +33,7 @@ require (
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
 	github.com/spf13/cast v1.7.1 // indirect
 	github.com/stretchr/objx v0.5.2 // indirect
-	go.unistack.org/micro-proto/v4 v4.1.0 // indirect
+	go.unistack.org/micro-proto/v5 v4.1.0 // indirect
 	golang.org/x/exp v0.0.0-20250106191152-7588d65b2ba8 // indirect
 	golang.org/x/net v0.38.0 // indirect
 	golang.org/x/sys v0.31.0 // indirect

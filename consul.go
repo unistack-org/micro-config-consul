@@ -6,8 +6,8 @@ import (
 
 	"dario.cat/mergo"
 	"github.com/hashicorp/consul/api"
-	"go.unistack.org/micro/v4/config"
-	rutil "go.unistack.org/micro/v4/util/reflect"
+	"go.unistack.org/micro/v5/config"
+	rutil "go.unistack.org/micro/v5/util/reflect"
 )
 
 var DefaultStructTag = "consul"
